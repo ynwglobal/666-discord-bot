@@ -1,110 +1,162 @@
-# 666 Discord Bot (Hikari)
+# 666 Discord Bot
 
-Current runtime is `666_hikari.py` (hikari + lightbulb).
+A feature-rich Discord bot built on **hikari + lightbulb**, focused on media tools, configurable embeds, upload workflows, and moderation/notification utilities.
 
-## Features
+Primary runtime: `666_hikari.py`
 
-- Embed theming engine (`/theme ...`) with v1/v2 theme formats.
-- Global private mode (`/misc private`) to make command responses ephemeral.
-- Upload system with domain/preset picker, custom OG modal, upload logs, delete/purge tools.
-- Twitter/X auto-preview fixer (guild-level toggle) that converts Twitter/X links to FxTwitter and deletes original message.
-- Media downloader commands for YouTube, Twitter/X, and Instagram.
-- Raid/spam detection with moderation action components.
-- Notification channel + per-event notification toggles.
-- Legacy reply commands `.emoji` / `.sticker` (custom per-guild prefix).
+## Overview
 
-## Config Files
+This bot is built around a configuration-first workflow with JSON-backed state.  
+It supports:
 
-- `themes.json`: themes, current theme, private mode, default twitter preview toggle.
-- `auth.json`: authorized users.
-- `uploads.json`: upload history and deletion metadata.
-- `upload_configs.json`: upload host domains/tokens.
-- `og_presets.json`: OG preset definitions.
-- `bot_config.json`: notification channel and per-guild twitter preview settings.
-- `prefixes.json`: per-guild legacy prefix.
+- media downloads from YouTube, Twitter/X, and Instagram
+- a themed embed system (including advanced layout themes)
+- interactive upload menus with OG metadata presets
+- raid/spam detection with moderation controls
+- owner/admin tooling and notification routing
 
-## Media Download Notes
+## Highlights
 
-### YouTube (`/misc youtube`)
+### Media Downloader Suite
 
-- Supports normal videos + Shorts + `youtu.be`.
-- Format preference:
-  - with ffmpeg: `bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best`
-  - without ffmpeg: `best[ext=mp4]/best`
-- This targets highest practical quality while keeping Discord-friendly outputs.
+- `/misc youtube` supports standard videos, Shorts, and `youtu.be` links.
+- `/misc twitter` handles normal tweets, media tweets, replies, quotes, and GIF edge cases.
+- `/misc instagram` supports reels, posts, stories, highlights, and many Instagram share URLs.
 
-### Twitter/X (`/misc twitter`)
+### Twitter/X Quality-of-Life
 
-- Uses API/media fallback logic for better reliability.
-- For GIF posts, tries extracting true `.gif` via FxTwitter unfurl probe channel.
-- For text-only/no-media posts, returns a rich Twitter-style embed instead of failing.
-- Twitter result embeds now include:
+- Rich Twitter-style embeds for fallback/link-only cases and uploaded results.
+- Embed content includes:
   - display name + `@handle`
   - profile image
   - tweet text
-  - preview media image when available
-  - reply context (`Replying to @...`) when present
-  - quote context with clickable quoted-author link when available
+  - preview image (when available)
+  - reply context
+  - quote context
+  - clickable quote-author link (when quote URL exists)
   - `Open Post` link
+- Optional auto-convert feature for message links:
+  - converts `twitter.com` / `x.com` links to `fxtwitter.com`
+  - reposts converted links
+  - deletes original message
 
-### Instagram (`/misc instagram`)
+### Upload Workflow
 
-- Supports reel/post/tv/story/highlight URLs, including many `instagram.com/s/...` share links.
-- Highlight share links are normalized and resolved through multiple candidate URL forms.
-- For login-gated content (stories/highlights/private media), downloader retries with cookies:
-  - `YTDLP_COOKIES_FILE` (if provided)
-  - browsers from `YTDLP_COOKIES_BROWSERS` (default fallback: `firefox`)
-- With ffmpeg, Instagram outputs are recoded to Discord-safe H.264/AAC MP4.
+- Interactive domain + preset selection menu.
+- Optional custom OG modal (`title`, `description`, `color`).
+- Placeholder support in presets (`{user}`, `{date}`, `{time}`, `{total_uploads}`, `{file_size}`).
+- Upload history, per-user/global stats, deletion, and owner purge.
 
-## Commands
+### Theme System
 
-### Public / Utility
+- `/theme` command group for selecting, listing, previewing, adding, and deleting themes.
+- Supports standard theme fields and v2 layout-style theme data.
+- Global private mode integrates with command responses.
 
-- `/misc help`
-- `/misc invite`
-- `/misc checkuser`
-- `/misc techstack`
-- `/misc youtube`
-- `/misc twitter`
-- `/misc instagram`
-- `/misc capture` (authorized users)
-- `/ping`
-- `/projectinfo`
-- `/changelog`
+## Command Reference
 
-### Uploads
+### General Commands
 
-- `/misc upload` (authorized users)
-- `/misc delete` (authorized users)
-- `/misc uploads` (authorized users)
-- `/misc purge` (owner only)
+| Command | Description |
+|---|---|
+| `/misc help` | Command browser with category selector |
+| `/misc invite` | Bot install links |
+| `/misc checkuser` | Username availability check (TikTok/YouTube/Twitter) |
+| `/misc techstack` | Detect website technologies |
+| `/misc youtube` | Download YouTube video/Shorts |
+| `/misc twitter` | Download Twitter/X media or return rich tweet card |
+| `/misc instagram` | Download Instagram reel/post/story/highlight |
+| `/misc capture` | Capture network traffic report (authorized only) |
+| `/ping` | Gateway/API latency check |
+| `/projectinfo` | Runtime/system stats |
+| `/changelog` | Paginated changelog |
 
-### Owner/Admin
+### Upload Commands
 
-- `/misc access`
-- `/misc listauth`
-- `/misc private`
-- `/misc notifystatus`
-- `/misc notifyconfig`
-- `/misc setnotifychannel`
-- `/theme select`
-- `/theme list`
-- `/theme current`
-- `/theme add`
-- `/theme delete`
+| Command | Access | Description |
+|---|---|---|
+| `/misc upload` | Authorized | Interactive upload menu |
+| `/misc delete` | Authorized | Delete by deletion URL |
+| `/misc uploads` | Authorized | Upload stats/history |
+| `/misc purge` | Owner | Remove upload log entry |
+
+### Owner/Admin Commands
+
+| Command | Description |
+|---|---|
+| `/misc access` | Grant/revoke authorized users |
+| `/misc listauth` | List authorized users |
+| `/misc private` | Toggle private response mode |
+| `/misc notifystatus` | Show notification status |
+| `/misc notifyconfig` | Toggle notification event types |
+| `/misc setnotifychannel` | Set/disable notification channel |
+
+### Theme Commands (Owner)
+
+| Command | Description |
+|---|---|
+| `/theme select` | Set active theme |
+| `/theme list` | List all themes |
+| `/theme current` | Preview active theme |
+| `/theme add` | Add theme from JSON |
+| `/theme delete` | Delete theme |
 
 ### Guild Settings
 
-- `/misc twitterpreview` (Manage Server or owner)
-- `/misc prefix` (Manage Server or owner)
+| Command | Permission | Description |
+|---|---|---|
+| `/misc twitterpreview` | Manage Server or Owner | Toggle auto Twitter/X preview conversion per guild |
+| `/misc prefix` | Manage Server or Owner | Set legacy prefix per guild |
 
 ### Context + Legacy
 
 - Message command: `Enlarge Emoji/Sticker`
-- Legacy reply commands: `.emoji`, `.sticker` (or configured guild prefix)
+- Legacy reply commands: `.emoji` and `.sticker` (or configured prefix)
 
-## Permission Model
+## Media Behavior Details
 
-- Owner-only commands are still owner-gated.
-- Non-owner responses follow normal visibility unless private mode is on.
-- When private mode is enabled, command responses use ephemeral where applicable.
+### YouTube
+
+Format target:
+
+- with ffmpeg: `bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best`
+- without ffmpeg: `best[ext=mp4]/best`
+
+This prioritizes quality while preserving Discord-friendly output.
+
+### Twitter/X
+
+- Uses robust fallback logic through status metadata + media endpoint parsing.
+- GIF handling attempts true `.gif` extraction from FxTwitter unfurls via a configured probe channel.
+- If no downloadable media exists, returns a rich tweet card instead of hard-failing.
+
+### Instagram
+
+- Normalizes many share URLs (`instagram.com/s/...`) into valid highlight/story candidates.
+- Supports login-gated retry flow:
+  - `YTDLP_COOKIES_FILE` if configured
+  - `YTDLP_COOKIES_BROWSERS` list (default fallback: `firefox`)
+- When ffmpeg is available, Instagram outputs are recoded to Discord-compatible H.264/AAC MP4.
+
+## Permissions Model
+
+- **Owner-only** commands remain strictly owner-gated.
+- **Authorized-user** commands are controlled through `auth.json`.
+- **Private mode** affects visibility of command responses (ephemeral where supported).
+
+## Configuration Files
+
+| File | Purpose |
+|---|---|
+| `themes.json` | Theme registry, active theme, private mode, default preview toggle |
+| `auth.json` | Authorized user IDs |
+| `uploads.json` | Upload records and deletion metadata |
+| `upload_configs.json` | Upload domain endpoints/tokens |
+| `og_presets.json` | OG metadata preset definitions |
+| `bot_config.json` | Notification channel + per-guild preview config |
+| `prefixes.json` | Per-guild legacy prefix mapping |
+
+## Notes
+
+- The bot auto-installs some missing Python packages at runtime.
+- For Instagram stories/highlights/private content, a logged-in browser cookie source is required.
