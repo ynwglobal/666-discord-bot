@@ -4,6 +4,8 @@ A feature-rich Discord bot built on **hikari + lightbulb**, focused on media too
 
 Primary runtime: `666_hikari.py`
 
+> If you want this released for free, please star this repo.
+
 ## Overview
 
 This bot is built around a configuration-first workflow with JSON-backed state.  
