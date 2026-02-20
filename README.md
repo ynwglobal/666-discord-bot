@@ -108,4 +108,3 @@ Current runtime is `666_hikari.py` (hikari + lightbulb).
 - Owner-only commands are still owner-gated.
 - Non-owner responses follow normal visibility unless private mode is on.
 - When private mode is enabled, command responses use ephemeral where applicable.
-2. Run `python 666_hikari.py`.
