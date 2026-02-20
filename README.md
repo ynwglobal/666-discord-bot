@@ -1,93 +1,111 @@
-# 666 Discord Bot
+# 666 Discord Bot (Hikari)
 
-This document details the internal mechanics, feature set, and command structure of the 666 Discord Bot. The bot is designed with a modular architecture focusing on advanced embed theming, file uploading with metadata injection, automated moderation, and system monitoring.
+Current runtime is `666_hikari.py` (hikari + lightbulb).
 
-## System Architecture
+## Features
 
-The bot operates on a configuration-driven model using persistent JSON storage for state management. It utilizes asynchronous network requests to handle file uploads and status checks without blocking the main event loop.
+- Embed theming engine (`/theme ...`) with v1/v2 theme formats.
+- Global private mode (`/misc private`) to make command responses ephemeral.
+- Upload system with domain/preset picker, custom OG modal, upload logs, delete/purge tools.
+- Twitter/X auto-preview fixer (guild-level toggle) that converts Twitter/X links to FxTwitter and deletes original message.
+- Media downloader commands for YouTube, Twitter/X, and Instagram.
+- Raid/spam detection with moderation action components.
+- Notification channel + per-event notification toggles.
+- Legacy reply commands `.emoji` / `.sticker` (custom per-guild prefix).
 
-### Configuration Files
-*   **themes.json**: Stores visual themes and global display settings like private mode and Twitter preview toggles.
-*   **auth.json**: Manages the whitelist of users authorized to use restricted commands.
-*   **uploads.json**: Logs the history of all file uploads, including URLs, timestamps, and deletion keys.
-*   **prefixes.json**: Stores custom command prefixes on a per-guild basis.
-*   **bot_config.json**: Stores logging configuration, including the webhook URL and toggle states for specific event notifications.
-*   **upload_configs.json**: Contains API credentials and endpoints for the file hosting services.
-*   **og_presets.json**: Defines reusable templates for Open Graph meta tags used during file uploads.
+## Config Files
 
-## Core Features
+- `themes.json`: themes, current theme, private mode, default twitter preview toggle.
+- `auth.json`: authorized users.
+- `uploads.json`: upload history and deletion metadata.
+- `upload_configs.json`: upload host domains/tokens.
+- `og_presets.json`: OG preset definitions.
+- `bot_config.json`: notification channel and per-guild twitter preview settings.
+- `prefixes.json`: per-guild legacy prefix.
 
-### Theming Engine
-The bot employs a dynamic theming system that intercepts outgoing embeds and applies visual properties based on the active configuration.
+## Media Download Notes
 
-*   **Standard Themes**: Applies consistent colors, footer text, author icons, and thumbnail images to embeds.
-*   **V2 Layout Engine**: Supports complex embed structures defined by a layout array. This allows for:
-    *   **Text Injection**: Inserting static text or dynamic content placeholders.
-    *   **Separators**: Visual dividers between content sections.
-    *   **Images**: Defining specific image placements.
-    *   **Sections**: Creating distinct fields within the embed.
-*   **Private Mode**: A global toggle that forces all bot responses to be "ephemeral" (visible only to the command initiator), ensuring privacy during operation.
+### YouTube (`/misc youtube`)
 
-### File Upload System
-A proxy system for uploading files to external hosts with custom metadata.
+- Supports normal videos + Shorts + `youtu.be`.
+- Format preference:
+  - with ffmpeg: `bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best`
+  - without ffmpeg: `best[ext=mp4]/best`
+- This targets highest practical quality while keeping Discord-friendly outputs.
 
-*   **Open Graph Injection**: The bot sends a JSON payload alongside the file data to inject custom `og:title`, `og:description`, and `og:color` tags into the resulting URL.
-*   **Interactive Menu**: The upload command triggers a UI with dropdowns to select the destination domain and metadata presets.
-*   **Presets**: Users can select pre-defined metadata templates. These templates support placeholders like `{user}`, `{date}`, `{time}`, and `{file_size}` which are populated at runtime.
-*   **Logging & Management**: Every upload is logged. Users can view their upload history, and authorized users can delete files directly through the bot using the stored deletion keys.
+### Twitter/X (`/misc twitter`)
 
-### Automated Moderation
-The bot monitors guild activity for patterns indicative of raids or spam.
+- Uses API/media fallback logic for better reliability.
+- For GIF posts, tries extracting true `.gif` via FxTwitter unfurl probe channel.
+- For text-only/no-media posts, returns a rich Twitter-style embed instead of failing.
+- Twitter result embeds now include:
+  - display name + `@handle`
+  - profile image
+  - tweet text
+  - preview media image when available
+  - reply context (`Replying to @...`) when present
+  - quote context with clickable quoted-author link when available
+  - `Open Post` link
 
-*   **Raid Detection**: Triggers if a specific number of members join within a short timeframe (default: 5 members in 8 seconds).
-*   **Spam Detection**: Triggers if a single user sends a specific number of messages rapidly (default: 5 messages in 5 seconds).
-*   **Mitigation Tools**: When an alert is triggered, the bot sends a notification with interactive buttons to Ban, Mute (Timeout), or Dismiss the alert. The Mute button includes a dropdown to select the timeout duration.
+### Instagram (`/misc instagram`)
 
-### Notification System
-A centralized logging system that forwards events to a configured webhook.
+- Supports reel/post/tv/story/highlight URLs, including many `instagram.com/s/...` share links.
+- Highlight share links are normalized and resolved through multiple candidate URL forms.
+- For login-gated content (stories/highlights/private media), downloader retries with cookies:
+  - `YTDLP_COOKIES_FILE` (if provided)
+  - browsers from `YTDLP_COOKIES_BROWSERS` (default fallback: `firefox`)
+- With ffmpeg, Instagram outputs are recoded to Discord-safe H.264/AAC MP4.
 
-*   **Event Types**:
-    *   Command Errors
-    *   Member Bans and Unbans (includes moderator and reason from audit logs)
-    *   Raid and Spam Detections
-    *   Bot Guild Joins/Leaves
-    *   Message Deletions and Edits
-*   **Configuration**: The owner can toggle specific notification types on or off via a GUI menu.
+## Commands
 
-### Utilities
-*   **Service Status**: Checks the API status of Cloudflare, Vercel, and Netlify.
-*   **Twitter/X Fixer**: Automatically detects `twitter.com` and `x.com` links in messages and replaces them with `fxtwitter.com` links to ensure media embeds render correctly. The original message is deleted.
-*   **System Info**: Displays real-time CPU usage, RAM usage, uptime, and latency.
+### Public / Utility
 
-## Command Reference
+- `/misc help`
+- `/misc invite`
+- `/misc checkuser`
+- `/misc techstack`
+- `/misc youtube`
+- `/misc twitter`
+- `/misc instagram`
+- `/misc capture` (authorized users)
+- `/ping`
+- `/projectinfo`
+- `/changelog`
 
-### General & Utility
-*   `/projectinfo`: Displays detailed system statistics, bot version, and resource usage.
-*   `/checkstatus [service]`: Checks the operational status of Vercel, Cloudflare, or Netlify.
-*   `/voice join`: Joins the voice channel the user is currently in.
-*   `/voice leave`: Disconnects the bot from the current voice channel.
-*   `/nightyscripting help`: Provides documentation links for Nighty UI scripting.
-*   `/prefix [new_prefix]`: Sets the command prefix for the current server (Requires Manage Server permission).
-*   `.emoji` (Reply Only): Enlarges custom emojis found in the replied message and provides their image links.
+### Uploads
 
-### Theme Management (Owner Only)
-*   `/theme select [theme_name]`: Sets the active visual theme for the bot.
-*   `/theme list`: Displays a list of all available themes.
-*   `/theme current`: Shows a preview of the currently active theme.
-*   `/theme add [name] [json_string]`: Adds a new theme configuration via a JSON string.
-*   `/theme delete [theme_name]`: Deletes an existing theme configuration.
+- `/misc upload` (authorized users)
+- `/misc delete` (authorized users)
+- `/misc uploads` (authorized users)
+- `/misc purge` (owner only)
 
-### File Uploads & Access (Authorized Users)
-*   `/misc upload [file]`: Opens the interactive menu to upload a file with custom domain and Open Graph settings.
-*   `/misc delete [deletion_url]`: Deletes a file from the host using its deletion URL.
-*   `/misc nightyauth`: Displays the authentication GIF (Authorized users only).
+### Owner/Admin
 
-### Administration & Configuration (Owner Only)
-*   `/misc access [user] [grant/revoke]`: Grants or revokes access to restricted commands (like upload) for a specific user.
-*   `/misc listauth`: Lists all users who have been granted access.
-*   `/misc private [on/off]`: Toggles "Private Mode", making all bot responses ephemeral.
-*   `/misc uploads [user]`: Views upload statistics. If a user is specified, shows their uploads; otherwise, shows global stats.
-*   `/misc purge [upload_url]`: Removes a specific upload record from the bot's local log without deleting the file from the host.
-*   `/misc setnotifychannel [channel]`: Sets the text channel where the bot will send log notifications.
-*   `/misc notifystatus`: Checks the current status of the notification channel configuration.
-*   `/misc notifyconfig`: Opens an interactive menu to toggle specific notification events (e.g., bans, errors, spam).
+- `/misc access`
+- `/misc listauth`
+- `/misc private`
+- `/misc notifystatus`
+- `/misc notifyconfig`
+- `/misc setnotifychannel`
+- `/theme select`
+- `/theme list`
+- `/theme current`
+- `/theme add`
+- `/theme delete`
+
+### Guild Settings
+
+- `/misc twitterpreview` (Manage Server or owner)
+- `/misc prefix` (Manage Server or owner)
+
+### Context + Legacy
+
+- Message command: `Enlarge Emoji/Sticker`
+- Legacy reply commands: `.emoji`, `.sticker` (or configured guild prefix)
+
+## Permission Model
+
+- Owner-only commands are still owner-gated.
+- Non-owner responses follow normal visibility unless private mode is on.
+- When private mode is enabled, command responses use ephemeral where applicable.
+2. Run `python 666_hikari.py`.
