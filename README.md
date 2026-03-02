@@ -11,7 +11,8 @@ Primary runtime: `666_hikari.py`
 This bot is built around a configuration-first workflow with JSON-backed state.  
 It supports:
 
-- media downloads from YouTube, Twitter/X, and Instagram
+- media downloads from YouTube, Twitter/X, Instagram, TikTok, and Snapchat
+- video-to-GIF conversion for uploaded attachments
 - a themed embed system (including advanced layout themes)
 - interactive upload menus with OG metadata presets
 - raid/spam detection with moderation controls
@@ -24,6 +25,9 @@ It supports:
 - `/misc youtube` supports standard videos, Shorts, and `youtu.be` links.
 - `/misc twitter` handles normal tweets, media tweets, replies, quotes, and GIF edge cases.
 - `/misc instagram` supports reels, posts, stories, highlights, and many Instagram share URLs.
+- `/misc tiktok` supports TikTok video links and story-style links when publicly accessible.
+- `/misc snapchat` supports spotlight/story/discover links.
+- `/misc video-to-gif` converts uploaded `.mp4/.mov/.webm/...` files to GIF.
 
 ### Twitter/X Quality-of-Life
 
@@ -63,11 +67,16 @@ It supports:
 |---|---|
 | `/misc help` | Command browser with category selector |
 | `/misc invite` | Bot install links |
+| `/misc website` | Open full hosted command/docs reference |
 | `/misc checkuser` | Username availability check (TikTok/YouTube/Twitter) |
+| `/misc domainexpiry` | Domain registration + expiry lookup |
 | `/misc techstack` | Detect website technologies |
 | `/misc youtube` | Download YouTube video/Shorts |
 | `/misc twitter` | Download Twitter/X media or return rich tweet card |
 | `/misc instagram` | Download Instagram reel/post/story/highlight |
+| `/misc tiktok` | Download TikTok video/story |
+| `/misc snapchat` | Download Snapchat spotlight/story/discover media |
+| `/misc video-to-gif` | Convert uploaded video attachments to GIF |
 | `/misc capture` | Capture network traffic report (authorized only) |
 | `/ping` | Gateway/API latency check |
 | `/projectinfo` | Runtime/system stats |
@@ -92,6 +101,38 @@ It supports:
 | `/misc notifystatus` | Show notification status |
 | `/misc notifyconfig` | Toggle notification event types |
 | `/misc setnotifychannel` | Set/disable notification channel |
+
+### Short Link Commands (Owner)
+
+| Command | Description |
+|---|---|
+| `/shorten link` | Create a short link |
+| `/shortned links` | List/query existing links |
+| `/shorten edit` | Edit target/title/path |
+| `/shorten delete` | Delete a short link |
+| `/shorten domains` | List configured short domains |
+| `/shorten opengraph` | View/update OpenGraph fields |
+| `/shorten permissions` | List/grant/revoke short-link permissions |
+| `/shorten target` | Manage country targeting rules |
+
+### Overwatch Commands
+
+| Command | Description |
+|---|---|
+| `/overwatch stats` | Player stats summary card |
+| `/overwatch player` | Combined player payload |
+| `/overwatch summary` | Player profile summary |
+| `/overwatch search` | Search players by name |
+| `/overwatch career` | Detailed career stats (raw) |
+| `/overwatch statsraw` | Detailed labeled stats (raw) |
+| `/overwatch heroes` | List heroes with filters |
+| `/overwatch hero` | Single hero profile |
+| `/overwatch herostats` | Hero meta stats |
+| `/overwatch roles` | List roles |
+| `/overwatch gamemodes` | List gamemodes |
+| `/overwatch gamemode` | Single gamemode profile |
+| `/overwatch maps` | List maps |
+| `/overwatch map` | Single map profile |
 
 ### Theme Commands (Owner)
 
