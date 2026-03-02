@@ -154,6 +154,7 @@ It supports:
 ### Context + Legacy
 
 - Message command: `Enlarge Emoji/Sticker`
+- Message command: `Video to GIF` (hold a message -> Apps -> `Video to GIF` on messages with video attachments)
 - Legacy reply commands: `.emoji` and `.sticker` (or configured prefix)
 
 ## Media Behavior Details
